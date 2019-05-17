@@ -1,30 +1,31 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, request, current_app, jsonify
 import pytz
-from .service import get_recent_data, get_time_limit
+from .service import get_recent_data, get_time_limit, get_two_weeks_time_limit
 
 campus_display = Blueprint("campus_display", __name__, url_prefix="/campus")
 
 @campus_display.route("/<int:campus_id>", methods=["GET"])
 def get_partial_data(campus_id):
     try:
-        convert_to_taiwan = timedelta(hours=8)
         upper, lower = get_time_limit()
-        current_app.logger.info(campus_id)
+        taiwan_timezone = 'Asia/Taipei'
+        utc_aware = upper.replace(tzinfo=pytz.utc)
+        taiwan_aware = utc_aware.astimezone(pytz.timezone(taiwan_timezone))
         # Unpack the dict to pass it to the function
         data = get_recent_data(campus_id, upper, lower)
         # Append time on each data
         avg_pm25 = {
-            'data': data.get('avg_pm25'),
-            'time': upper + convert_to_taiwan
+            'pm25': data.get('avg_pm25'),
+            'time': taiwan_aware
         }
         avg_temp = {
-            'data': data.get('avg_temp'),
-            'time': upper + convert_to_taiwan
+            'temp': data.get('avg_temp'),
+            'time': taiwan_aware
         }
         avg_humidity = {
-            'data': data.get('avg_humidity'),
-            'time': upper + convert_to_taiwan
+            'humidity': data.get('avg_humidity'),
+            'time': taiwan_aware
         }
         return jsonify(avg_pm25=avg_pm25, avg_temp=avg_temp, avg_humidity=avg_humidity)
     except AttributeError as err:
@@ -52,9 +53,6 @@ def init(campus_id):
             utc_aware = utc_unaware.replace(tzinfo=pytz.utc)
             # Convert this utc time to taiwan local time
             taiwan_aware = utc_aware.astimezone(pytz.timezone(taiwan_timezone))
-            current_app.logger.info(f'utc_unaware: {utc_unaware}')
-            current_app.logger.info(f'utc_aware: {utc_aware}')
-            current_app.logger.info(f'taiwan_aware: {taiwan_aware}')
             pm25.append({
                 'pm25': data.get('avg_pm25'),
                 'time': taiwan_aware
@@ -72,3 +70,7 @@ def init(campus_id):
         current_app.logger.info(err)
         result = "The request may not have the header of application/json"
         return result, 400
+
+@campus_display.route('/monitor', method=['GET'])
+def monitor():
+    upper, lower = get_two_weeks_time_limit()

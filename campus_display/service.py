@@ -8,6 +8,7 @@ from errors import QueryNotFound
 # Return value : The jsonified data that is ready to be sent, 404 if any error occured
 def get_recent_data(pos, upper, lower):
     try:
+        # prevent cycular import
         from flask_server import MONGO
         # current_app.logger.info(upper)
         # current_app.logger.info(lower)
@@ -65,3 +66,20 @@ def get_time_limit():
     upper = cur - time_d
     lower = cur - time_d - half
     return upper, lower
+
+
+def get_two_weeks_time_limit():
+    # fetch two weeks
+    two_weeks = timedelta(weeks=2)
+    cur = datetime.utcnow()
+    return cur, cur - two_weeks
+
+def transform_timezone(upper):
+    taiwan_timezone = 'Asia/Taipei'
+    # Make the datetime object aware of the timezone
+    # tzinfo=None can be specified to create a naive datetime
+    # from an aware datetime with no conversion of date and time data.
+    utc_aware = upper.replace(tzinfo=pytz.utc)
+    # Convert this utc time to taiwan local time
+    taiwan_aware = utc_aware.astimezone(pytz.timezone(taiwan_timezone))
+    return taiwan_aware
