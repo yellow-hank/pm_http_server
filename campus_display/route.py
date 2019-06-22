@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, request, current_app, jsonify
 import pytz
-from .service import get_recent_data, get_time_limit, get_two_weeks_time_limit
+from .service import get_recent_data, get_time_limit, get_two_weeks_data, get_two_weeks_time_limit, transform_timezone
 
 campus_display = Blueprint("campus_display", __name__, url_prefix="/campus")
 
@@ -9,9 +9,7 @@ campus_display = Blueprint("campus_display", __name__, url_prefix="/campus")
 def get_partial_data(campus_id):
     try:
         upper, lower = get_time_limit()
-        taiwan_timezone = 'Asia/Taipei'
-        utc_aware = upper.replace(tzinfo=pytz.utc)
-        taiwan_aware = utc_aware.astimezone(pytz.timezone(taiwan_timezone))
+        taiwan_aware = transform_timezone(upper)
         # Unpack the dict to pass it to the function
         data = get_recent_data(campus_id, upper, lower)
         # Append time on each data
@@ -36,7 +34,6 @@ def get_partial_data(campus_id):
 @campus_display.route('/init/<int:campus_id>', methods=["GET"])
 def init(campus_id):
     try:
-        taiwan_timezone = 'Asia/Taipei'
         half = timedelta(minutes=30)
         upper, lower = get_time_limit()
         current_app.logger.info(campus_id)
@@ -47,12 +44,7 @@ def init(campus_id):
         for i in range(12):
             utc_unaware = upper - (half * i)
             data = get_recent_data(campus_id, upper - (half * i), lower - (half * i))
-            # Make the datetime object aware of the timezone
-            # tzinfo=None can be specified to create a naive datetime
-            # from an aware datetime with no conversion of date and time data.
-            utc_aware = utc_unaware.replace(tzinfo=pytz.utc)
-            # Convert this utc time to taiwan local time
-            taiwan_aware = utc_aware.astimezone(pytz.timezone(taiwan_timezone))
+            taiwan_aware = transform_timezone(utc_unaware)
             pm25.append({
                 'pm25': data.get('avg_pm25'),
                 'time': taiwan_aware
@@ -71,6 +63,11 @@ def init(campus_id):
         result = "The request may not have the header of application/json"
         return result, 400
 
-@campus_display.route('/monitor', method=['GET'])
-def monitor():
+@campus_display.route('/display/<int:position>', methods=['GET'])
+def display(position):
     upper, lower = get_two_weeks_time_limit()
+    # taiwan_aware = transform_timezone(upper)
+    data = get_two_weeks_data(position, upper, lower)
+    current_app.logger.info(f"position: { position }")
+    return jsonify(data)
+

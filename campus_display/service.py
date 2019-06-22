@@ -8,7 +8,7 @@ from errors import QueryNotFound
 # Return value : The jsonified data that is ready to be sent, 404 if any error occured
 def get_recent_data(pos, upper, lower):
     try:
-        # prevent cycular import
+        # prevent circular import
         from flask_server import MONGO
         # current_app.logger.info(upper)
         # current_app.logger.info(lower)
@@ -52,6 +52,7 @@ def get_recent_data(pos, upper, lower):
             'avg_temp': 0,
             'avg_humidity': 0
         }
+
 def get_time_limit():
     half = timedelta(minutes=30)
     # Get the utc time which is unaware of the timezone
@@ -67,12 +68,48 @@ def get_time_limit():
     lower = cur - time_d - half
     return upper, lower
 
+# Helper function for displaying program
+def get_two_weeks_data(pos, upper, lower):
+    try:
+        # prevent circular import
+        from flask_server import MONGO
+        # current_app.logger.info(upper)
+        # current_app.logger.info(lower)
+        target_data = MONGO.db.pm_data
+        recentData = list(target_data.find(
+            {
+                'position': pos
+            },
+            {
+                '_id': 0,
+                'pm25': 1,
+                'temp': 1,
+                'humidity': 1,
+                'date': 1,
+            }
+        ))
+        # No data is found
+        if len(recentData) == 0:
+            raise QueryNotFound
+        return recentData
+    except QueryNotFound as err:
+        current_app.logger.info(err)
+        # return the placeholder data
+        return {
+            'avg_pm25': 0,
+            'avg_temp': 0,
+            'avg_humidity': 0
+        }
+
 
 def get_two_weeks_time_limit():
     # fetch two weeks
     two_weeks = timedelta(weeks=2)
     cur = datetime.utcnow()
     return cur, cur - two_weeks
+
+
+# General helper function
 
 def transform_timezone(upper):
     taiwan_timezone = 'Asia/Taipei'

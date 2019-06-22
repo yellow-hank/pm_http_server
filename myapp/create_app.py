@@ -1,5 +1,6 @@
 from flask import Flask
 from campus_display.route import campus_display
+from training.route import training
 
 def create_app():
     # Create Flask app
@@ -9,4 +10,5 @@ def create_app():
     app.config['MONGO_URI'] = 'mongodb://mongo:27017/pmBase'
     # Bind the blueprint
     app.register_blueprint(campus_display)
+    app.register_blueprint(training)
     return app
