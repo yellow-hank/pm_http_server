@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta
 from flask import Blueprint, request, current_app, jsonify
 import pytz
-from .service import get_recent_data, get_time_limit, get_two_weeks_data, get_two_weeks_time_limit, transform_timezone
+from .service import get_recent_data, get_time_limit, get_one_position_data, transform_timezone
 
 campus_display = Blueprint("campus_display", __name__, url_prefix="/campus")
 
@@ -65,9 +65,8 @@ def init(campus_id):
 
 @campus_display.route('/display/<int:position>', methods=['GET'])
 def display(position):
-    upper, lower = get_two_weeks_time_limit()
+    # upper, lower = get_two_weeks_time_limit()
     # taiwan_aware = transform_timezone(upper)
-    data = get_two_weeks_data(position, upper, lower)
+    data = get_one_position_data(position)
     current_app.logger.info(f"position: { position }")
     return jsonify(data)
-

@@ -69,7 +69,7 @@ def get_time_limit():
     return upper, lower
 
 # Helper function for displaying program
-def get_two_weeks_data(pos, upper, lower):
+def get_one_position_data(pos):
     try:
         # prevent circular import
         from flask_server import MONGO
@@ -83,6 +83,8 @@ def get_two_weeks_data(pos, upper, lower):
             {
                 '_id': 0,
                 'pm25': 1,
+                'pm10': 1,
+                'pm100': 1,
                 'temp': 1,
                 'humidity': 1,
                 'date': 1,
@@ -102,15 +104,14 @@ def get_two_weeks_data(pos, upper, lower):
         }
 
 
-def get_two_weeks_time_limit():
-    # fetch two weeks
-    two_weeks = timedelta(weeks=2)
-    cur = datetime.utcnow()
-    return cur, cur - two_weeks
+# def get_two_weeks_time_limit():
+#     # fetch two weeks
+#     two_weeks = timedelta(weeks=2)
+#     cur = datetime.utcnow()
+#     return cur, cur - two_weeks
 
 
 # General helper function
-
 def transform_timezone(upper):
     taiwan_timezone = 'Asia/Taipei'
     # Make the datetime object aware of the timezone

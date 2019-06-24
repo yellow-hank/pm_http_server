@@ -4,7 +4,12 @@ from .service import get_whole_data
 training = Blueprint("training", __name__, url_prefix="/training")
 
 # Getting whole data for training
-@training.route("/<int:campus_id>", methods=["GET"])
-def init(campus_id):
-  data = get_whole_data(campus_id)
-  return jsonify(data)
+@training.route("", methods=["GET"])
+def init():
+  try:
+    data = get_whole_data()
+    return jsonify(data)
+  except AttributeError as err:
+    current_app.logger.info(err)
+    result = "The request may not have the header of application/json"
+    return result, 400

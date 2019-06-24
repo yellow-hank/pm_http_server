@@ -1,12 +1,12 @@
 from flask import current_app
 from errors import QueryNotFound
 
-def get_whole_data(pos):
+def get_whole_data():
   try:
       # prevent circular import
       from flask_server import MONGO
       target_data = MONGO.db.pm_data
-      recentData = list(target_data.find({}))
+      recentData = list(target_data.find({}, { '_id': 0 }))
       # No data is found
       if len(recentData) == 0:
           raise QueryNotFound
