@@ -31,12 +31,11 @@ def get_partial_data(campus_id):
         result = "The request may not have the header of application/json"
         return result, 400
 
-@campus_display.route('/init/<int:campus_id>', methods=["GET"])
+@campus_display.route('/<int:campus_id>/initial', methods=["GET"])
 def init(campus_id):
     try:
         half = timedelta(minutes=30)
         upper, lower = get_time_limit()
-        current_app.logger.info(campus_id)
         pm25 = []
         temp = []
         humidity = []

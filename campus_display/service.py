@@ -57,7 +57,7 @@ def get_time_limit():
     half = timedelta(minutes=30)
     # Get the utc time which is unaware of the timezone
     cur = datetime.utcnow()
-    current_app.logger.info(cur)
+    # current_app.logger.info(cur)
     # Determine which interval cur is currently in
     # 0 ~ 29 or 30 ~ 59
     if cur.minute < 30:
