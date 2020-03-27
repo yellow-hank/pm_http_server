@@ -1,3 +1,9 @@
 pymongo
 flask_pymongo
+flask-cors
 pytz
+numpy
+pandas
+matplotlib
+Pillow
+pyopenssl
