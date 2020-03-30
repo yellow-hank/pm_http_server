@@ -82,6 +82,8 @@ def hour(campus_id):
             utc_unaware = upper - (half * i)
             data = get_recent_data(campus_id, upper - (half * i), lower - (half * i))
             taiwan_aware = transform_timezone(utc_unaware)
+	    #Change time format to "Year-Month-day Hour:minute:second"
+	    taiwan_aware = taiwan_aware.strftime("%Y-%m-%d %H:%M:%S")
             pm10.append({
                 'pm10': data.get('avg_pm10'),
                 'time': taiwan_aware
