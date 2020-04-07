@@ -1,6 +1,7 @@
 from flask import Flask
 from campus_display.route import campus_display
 from training.route import training
+from requests.route import requesting
 
 def create_app():
     # Create Flask app
@@ -11,4 +12,5 @@ def create_app():
     # Bind the blueprint
     app.register_blueprint(campus_display)
     app.register_blueprint(training)
+    app.register_blueprint(requesting)
     return app
