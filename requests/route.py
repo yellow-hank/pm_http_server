@@ -13,3 +13,4 @@ def init(campus_id):
     current_app.logger.info(err)
     result = "The request may not have the header of application/json"
     return result, 400
+  
