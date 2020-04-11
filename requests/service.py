@@ -7,11 +7,14 @@ def get_prob_single_sensor(campus_id):
         # prevent circular import
         from flask_server import MONGO
         target_data = MONGO.db.pm_data
-        
+        '''
         days = 90
         half = timedelta(days=1)
         cur = datetime.utcnow()
         lower = cur - half * days
+        '''
+        str = '2019-11-26 00:00:00'
+        date_time = datetime.strptime(str,'%Y-%m-%d %H:%M:%S')
         
         recentData = list(target_data.find({
                 '$and': [
@@ -20,7 +23,7 @@ def get_prob_single_sensor(campus_id):
                     },
                     {
                         'date': {
-                            '$gte': lower
+                            '$gte': date_time
                             
                         }
                     }
