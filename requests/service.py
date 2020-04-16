@@ -142,8 +142,8 @@ def get_specific_time_data(campus_id):
                         "date": taiwan_aware
                     })
 
-        #if len(pmdata) == 0:
-         #       raise QueryNotFound
+        # if len(pmdata) == 0:
+        #         raise QueryNotFound
         return specific_time_data
     except QueryNotFound as err:
         current_app.logger.info(err)
