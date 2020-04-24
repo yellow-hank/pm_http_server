@@ -41,18 +41,21 @@ def route_cal(start_lat,start_lng,end_lat,end_lng):
         # result.append(start_lng)
         # result.append(end_lat)
         # result.append(end_lng)
-        # pm25_list = [0, 0, 0, 80, 80, 0, 80, 0]
+        #pm25_list = [46, 45.5, 42, 42, 42.5, 42, 40, 38.5]
         pm25_list=[]
         upper, lower = get_time_limit()
         taiwan_aware = transform_timezone(upper)
      # Unpack the dict to pass it to the function
         for i in range(8):
             data = get_recent_data(i, upper, lower)
-            pm25_list.append(data.get('avg_pm25'))
+            #pm25_list.append(int(data.get('avg_pm25')))
 
 
         result = route_planning(start_lat,start_lng,end_lat,end_lng,pm25_list)
-        return jsonify(result)
+        format_result=[]
+        for i in result:
+            format_result.append({'lng':i[1], 'lat':i[0]})
+        return jsonify(format_result)
     except AttributeError as err:
         current_app.logger.info(err)
         result = "The request may not have the header of application/json"

@@ -3,7 +3,7 @@
 
 # In[4]:
 
-
+import sys
 import numpy as np
 import pandas as pd
 from matplotlib import colors
@@ -275,7 +275,7 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
             stop = False
 
             while stop == False:
-                dis = 1000
+                dis = sys.maxsize
                 start = 0
                 end = 0
                 for i in range(len(discovered)):
@@ -1108,7 +1108,7 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
                     start_road_list.append(blockList[path[0]].road_dic[rd][path[1]])
             start_road_list = list(set(start_road_list))
             if len(start_road_list) > 1:
-                
+                GOOGLE_PLACES_API_KEY = 
                 gmaps = googlemaps.Client(key=GOOGLE_PLACES_API_KEY)
                 for srl in start_road_list:
                     origin = (lat, long)
@@ -1153,7 +1153,7 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
     return roads
 
 # result = route_planning(22.999904, 120.153379, 22.996792, 120.222442)
-# print (result)
+
 
 # In[ ]:
 
