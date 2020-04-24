@@ -48,7 +48,7 @@ def route_cal(start_lat,start_lng,end_lat,end_lng):
      # Unpack the dict to pass it to the function
         for i in range(8):
             data = get_recent_data(i, upper, lower)
-            #pm25_list.append(int(data.get('avg_pm25')))
+            pm25_list.append(int(data.get('avg_pm25')))
 
 
         result = route_planning(start_lat,start_lng,end_lat,end_lng,pm25_list)
