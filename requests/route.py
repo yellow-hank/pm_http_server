@@ -1,5 +1,5 @@
 from flask import Blueprint, request, current_app, jsonify
-from .service import get_prob_single_sensor, get_specific_time_data
+from .service import get_prob_single_sensor, get_specific_time_data,get_one_month_data,get_one_day_data
 from flask_cors import cross_origin
 from .route_planning import route_planning
 from campus_display.service import get_time_limit, transform_timezone, get_recent_data
@@ -60,4 +60,33 @@ def route_cal(start_lat,start_lng,end_lat,end_lng):
         current_app.logger.info(err)
         result = "The request may not have the header of application/json"
         return result, 400
-  
+# data for drawing box plot chart  
+@requesting.route("/get_one_month_data", methods=["GET"])
+@cross_origin()
+def one_month_data():
+    try:
+        one_month=[]
+        for sensor_id in range(8):
+        
+            result = get_one_month_data(sensor_id)
+            one_month.append({str(sensor_id):result})
+        return jsonify(one_month)
+    except AttributeError as err:
+        current_app.logger.info(err)
+        result = "The request may not have the header of application/json"
+        return result, 400
+# data for drawing splom chart
+@requesting.route("/get_one_day_data", methods=["GET"])
+@cross_origin()
+def one_day_data():
+    try:
+        one_day=[]
+        for sensor_id in range(8):
+        
+            result = get_one_day_data(sensor_id)
+            one_day.append({str(sensor_id):result})
+        return jsonify(one_day)
+    except AttributeError as err:
+        current_app.logger.info(err)
+        result = "The request may not have the header of application/json"
+        return result, 400

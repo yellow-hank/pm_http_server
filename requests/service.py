@@ -30,7 +30,7 @@ def get_prob_single_sensor(campus_id):
                 ]
         }))
         #recentData = list(target_data.find({}, { '_id': 0 }))
-        print (date_time)
+        #print (date_time)
         green =[0]*24
         yellow = [0]*24
         orange = [0] *24
@@ -149,3 +149,127 @@ def get_specific_time_data(campus_id):
         current_app.logger.info(err)
         # return the an empty arr
         return []
+
+
+def get_one_month_data(campus_id):
+    try:
+        # prevent circular import
+        from flask_server import MONGO
+        target_data = MONGO.db.pm_data
+        half_day = timedelta(days=1)
+        half_hour = timedelta(hours=1)
+        #use utc because mongo use utc 
+        now = datetime.utcnow()
+        one_month_data=[]
+        
+        for i in range(24):
+            one_month_data.append([])
+            
+        for day in range(2,32):
+            one_day_pm25 = []
+            one_day_count = []
+            for i in range(24):
+                one_day_pm25.append(0)
+                one_day_count.append(0)
+
+            lower = now.replace(hour = 16,minute = 0, second = 0) 
+            upper = now.replace(hour = 16,minute = 0, second = 0) 
+            lower = lower- half_day * day 
+            upper = upper- half_day * (day-1) 
+            pmdata = list(target_data.find({
+                        '$and': [
+                            {
+                                'position': campus_id
+                            },
+                            {
+                                'date': {
+                                    '$gte': lower,
+                                    '$lte': upper
+                                }
+                            }
+                        ]
+                }))
+
+            for i in range(len(pmdata)):
+                pm25 = int(pmdata[i]["pm25"])
+                hour = int(pmdata[i]["date"].hour)
+                hour +=8
+                if(hour > 23):
+                    hour-=24
+                one_day_pm25[hour]+=pm25
+                one_day_count[hour]+=1
+
+            for i in range(24):
+                if(one_day_count[i] == 0):
+                    one_month_data[i].append(float(one_day_pm25[i]))
+                else:
+                    one_month_data[i].append(float(one_day_pm25[i])/one_day_count[i])
+
+        return one_month_data
+    except QueryNotFound as err:
+        current_app.logger.info(err)
+        # return the an empty arr
+        return []
+
+# this one is for drawing splom cart about time ,pm25,humidity
+def get_one_day_data(campus_id):
+    try:
+        # prevent circular import
+        from flask_server import MONGO
+        target_data = MONGO.db.pm_data
+        half_day = timedelta(days=1)
+        half_hour = timedelta(hours=1)
+        #use utc because mongo use utc 
+        now = datetime.utcnow()
+        one_day_data=[]
+        one_day_data_pm25 = []
+        one_day_data_humidity = []
+
+        
+        
+        for time in range(24):
+            lower = now.replace(hour = 16,minute = 0, second = 0) 
+            upper = now.replace(hour = 17,minute = 0, second = 0) 
+            lower = lower- half_day * 2 + time * half_hour
+            upper = upper- half_day * 2 + time * half_hour
+            pmdata = list(target_data.find({
+                        '$and': [
+                            {
+                                'position': campus_id
+                            },
+                            {
+                                'date': {
+                                    '$gte': lower,
+                                    '$lte': upper
+                                }
+                            }
+                        ]
+                }))
+
+            sum_pm25 = 0
+            sum_humidity = 0
+            for i in pmdata:
+                sum_pm25 +=i["pm25"]
+                sum_humidity +=i["humidity"]
+            
+            #Change time format to "Year-Month-day Hour:minute:second"
+            
+
+            if(len(pmdata) == 0):
+                one_day_data_pm25.append(float(sum_pm25))
+                one_day_data_humidity.append(float(sum_humidity))
+            else:
+                one_day_data_pm25.append(float(sum_pm25)/len(pmdata))
+                one_day_data_humidity.append(float(sum_humidity)/len(pmdata))
+        one_day_data.append(
+            {
+                'pm25':one_day_data_pm25,
+                'humidity': one_day_data_humidity
+            }
+        )
+        return one_day_data
+    except QueryNotFound as err:
+        current_app.logger.info(err)
+        # return the an empty arr
+        return []
+
