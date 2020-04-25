@@ -165,7 +165,7 @@ def get_one_month_data(campus_id):
         for i in range(24):
             one_month_data.append([])
             
-        for day in range(2,32):
+        for day in range(31,1,-1):
             one_day_pm25 = []
             one_day_count = []
             for i in range(24):
