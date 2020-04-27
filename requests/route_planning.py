@@ -1,25 +1,26 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[4]:
+# In[3]:
 
-import sys
+
 import numpy as np
 import pandas as pd
 from matplotlib import colors
 import math
 import googlemaps
 import os
-import requests
+#import requests
 import json
 from os.path import join, dirname
+import sys
 
 def route_planning(sLat, sLong, eLat, eLong,pm25):
     # 色溫圖的function(get campus pm2.5)
     airbox = ["x_pos", "y_pos", "pm25"]
     x_pos = [15, 39, 35, 17, 7, 40, 28, 56]
     y_pos = [55, 53, 5, 29, 44, 23, 31, 28]
-    # pm25 = [0, 0, 0, 80, 80, 0, 80, 0]
+    #pm25 = [0, 0, 0, 80, 80, 0, 80, 0]
     dic = {"x_pos": x_pos, "y_pos": y_pos, "pm25": pm25}
     airbox = pd.DataFrame(dic)
 
@@ -52,6 +53,12 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
             row = np.floor(((latitude - 22.992500) * 1000000) / 1850)
             col = np.floor(((longitude - 120.213255) * 1000000) / 1980)
             block_no = row * 6 + col
+            if block_no == 0 or block_no == 6:
+                block_no = 12
+            elif block_no == 1:
+                block_no = 2
+            elif block_no == 7:
+                block_no = 13
             return int(block_no), out_of_range
         # out of range
         else:
@@ -107,7 +114,8 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
         block.append(t)
 
         # block 2
-        t = Block([1, 3, 8])
+        #t = Block([1, 3, 8])
+        t = Block([1, 3])
         block.append(t)
 
         # block 3
@@ -131,7 +139,8 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
         block.append(t)
 
         # block 8
-        t = Block([7, 9, 2, 14])
+        #t = Block([7, 9, 2, 14])
+        t = Block([9, 2, 14])
         block.append(t)
 
         # block 9
@@ -147,11 +156,13 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
         block.append(t)
 
         # block 12
-        t = Block([13, 6, 18])
+        #t = Block([13, 6, 18])
+        t = Block([13, 18])
         block.append(t)
 
         # block 13
-        t = Block([12, 14, 7, 19])
+        #t = Block([12, 14, 7, 19])
+        t = Block([12, 14, 19])
         block.append(t)
 
         # block 14
@@ -1097,29 +1108,24 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
     def get_start_road(lat, long, path, blockList, Road):
         start_index, start_out_range = get_blockNo(lat, long)   #看要上面call還是這裡call
         start_road = {2:0, 3:1, 4:3, 5:6, 12:30, 23:108, 29:109, 30:107, 31:105, 32:100, 33:101, 34:102, 35:104}
+        range_start_road = {2:[14, -1, -1, 7], 3:[16, -1, 7, 10], 4:[19, -1, 10, 12], 5:[20, -1, 12, -1],
+                            8:[34, 14, -1, 24], 9:[36, 16, 24, 26], 10:[37, 19, 26, 28], 11:[41, 20, 28, -1],
+                            12:[49, -1, -1, 42], 13:[51, -1, 42, 43], 14:[53, 34, 43, 45], 15:[55, 36, 45, 48], 16:[56, 37, 48, -1], 17:[60, 41, -1, -1],
+                            18:[71, 49, -1, 61], 19:[74, 50, 61, 63], 20:[76, 53, 63, 65], 21:[78, 55, 65, 68], 22:[80, 56, 68, 70], 23:[106, 60, 70, -1],
+                            24:[90, 71, -1, 83], 25:[91, 74, 83, 85], 26:[92, 76, 85, 86], 27:[96, 78, 86, 87], 28:[93, 80, 87, 89], 29:[94, 106, 89, -1],
+                            30:[-1, 90, -1, 105], 31:[-1, 91, 99, 95], 32:[-1, 92, 95, 96], 33:[-1, 86, 96, 97], 34:[-1, 93, 97, 98], 35:[-1, 94, 98, -1]}
         if start_out_range:
-            #print(path)
             return start_road[start_index], path
         else:
-            start_road_list = []
-            times = []
-            for rd in blockList[path[0]].roadList:
-                if path[1] in blockList[path[0]].road_dic[rd].keys():
-                    start_road_list.append(blockList[path[0]].road_dic[rd][path[1]])
-            start_road_list = list(set(start_road_list))
-            if len(start_road_list) > 1:
-                GOOGLE_PLACES_API_KEY = 
-                gmaps = googlemaps.Client(key=GOOGLE_PLACES_API_KEY)
-                for srl in start_road_list:
-                    origin = (lat, long)
-                    des = Road[srl]
-                    result = gmaps.distance_matrix(origins = origin, destinations = des, mode = "walking")
-                    duration = result['rows'][0]['elements'][0]['duration']['text']
-                    temp = duration.split(" ", 1)
-                    times.append(int(temp[0])) #超過60min?
-                return start_road_list[times.index(min(times))], path[1:]
-            else:
-                return start_road_list[0], path[1:]
+            if path[1] == path[0]+6:
+                direct = 0  #向上
+            elif path[1] == path[0]-6:
+                direct = 1  #向下
+            elif path[1] == path[0]-1:
+                direct = 2  #向左
+            elif path[1] == path[0]+1:
+                direct = 3  #向右
+            return range_start_road[start_index][direct], path[1:]
 
     def get_pathList(blockList, path, start_road):
         pathList = []
@@ -1144,15 +1150,15 @@ def route_planning(sLat, sLong, eLat, eLong,pm25):
     path = get_path(start_index, end_index, block)
 
     blockList, Road = get_blockList_Road()
-    if len(path) > 2:
+    if len(path) > 1:
         start_road, path = get_start_road(start_lat, start_long, path, blockList, Road)
-    pathList = get_pathList(blockList, path, start_road)
+        pathList = get_pathList(blockList, path, start_road)
     roads = []
     for paths in pathList:
         roads.append(Road[paths])
     return roads
 
-# result = route_planning(22.999904, 120.153379, 22.996792, 120.222442)
+#result = route_planning(22.999904, 120.153379, 22.996792, 120.222442)
 
 
 # In[ ]:
