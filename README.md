@@ -1,6 +1,12 @@
 # PM2.5 http Server
 This repository includes http server to be run on Synology NAS, along with docker setting files.
 
+## Introduction 
+It is part of backend for ncku airpollution website.It connects with Mongodb and provides information for the website. 
+
+## Framework
+Flask
+
 ## Requirements
 Docker
 
